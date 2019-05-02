@@ -1,0 +1,1 @@
+ Get-EventLog -Newest 10 -LogName "Application" | Format-List

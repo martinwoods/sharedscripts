@@ -1,0 +1,878 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2008/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <Body>
+    <ReportItems>
+      <Tablix Name="table1">
+        <TablixBody>
+          <TablixColumns>
+            <TablixColumn>
+              <Width>8.25cm</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>5.49999cm</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>5.49999cm</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>4.49999cm</Width>
+            </TablixColumn>
+            <TablixColumn>
+              <Width>3.49999cm</Width>
+            </TablixColumn>
+          </TablixColumns>
+          <TablixRows>
+            <TablixRow>
+              <Height>0.75001cm</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox2">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>Client Order Number / Shipment Ref. / Product </Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>8pt</FontSize>
+                                <FontWeight>Bold</FontWeight>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Left</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox2</rd:DefaultName>
+                      <ZIndex>9</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#009fc6</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox4">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>Client / Supplier / Item Price</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>8pt</FontSize>
+                                <FontWeight>Bold</FontWeight>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Left</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox4</rd:DefaultName>
+                      <ZIndex>8</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#009fc6</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox6">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>Placed by / Status / Quantity </Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>8pt</FontSize>
+                                <FontWeight>Bold</FontWeight>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Left</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox6</rd:DefaultName>
+                      <ZIndex>7</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#009fc6</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox7">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>Order Total</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>8pt</FontSize>
+                                <FontWeight>Bold</FontWeight>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Left</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox7</rd:DefaultName>
+                      <ZIndex>6</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#009fc6</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox8">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>Notes</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>8pt</FontSize>
+                                <FontWeight>Bold</FontWeight>
+                                <Color>White</Color>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Left</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox8</rd:DefaultName>
+                      <ZIndex>5</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <BackgroundColor>#009fc6</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+            <TablixRow>
+              <Height>0.65001cm</Height>
+              <TablixCells>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox3">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Code.StripHTML( Code.iiif(Fields!RowType.Value, Fields!OrderGroupNumber.Value + " (" + Fields!OrderGroupId.Value.ToString() + ")", Fields!OrderNumber.Value, Fields!ProductName.Value) )</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>9pt</FontSize>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style />
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox3</rd:DefaultName>
+                      <ZIndex>4</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <TopBorder>
+                          <Color>=iif(Fields!RowType.Value=1, "LightGrey", "LightGrey")</Color>
+                          <Width>=iif(Fields!RowType.Value=1, "5pt", "1pt")</Width>
+                        </TopBorder>
+                        <BackgroundColor>=iif(Fields!RowType.Value = 1, "#00CCFF", iif(Fields!RowType.Value = 2, "#FFFFFF", "#FFFFFF"))</BackgroundColor>
+                        <PaddingLeft>= iif(Fields!RowType.Value = 1, "1mm", iif(Fields!RowType.Value = 2, "5mm", "10mm"))</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="textbox5">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Code.iiif(Fields!RowType.Value, Fields!ClientName.Value, Fields!SupplierName.Value, Fields!SellCurrencyCode.Value + " " + CDBl(Fields!ItemSellPrice.Value).ToString("0.00"))</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>9pt</FontSize>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>=iif(Fields!RowType.Value=1 Or Fields!RowType.Value = 2, "Left", "Right")</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>textbox5</rd:DefaultName>
+                      <ZIndex>3</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <TopBorder>
+                          <Color>=iif(Fields!RowType.Value=1, "LightGrey", "LightGrey")</Color>
+                          <Width>=iif(Fields!RowType.Value=1, "5pt", "1pt")</Width>
+                        </TopBorder>
+                        <BackgroundColor>=iif(Fields!RowType.Value = 1, "#00CCFF", iif(Fields!RowType.Value = 2, "#99CCFF", "#FFFFFF"))</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="OrderHeaderId">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Code.iiif(Fields!RowType.Value, Fields!Email.Value, Fields!OrderStatus.Value, CDbl(Fields!OrderedQuantity.Value).ToString("0") + " ")</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>9pt</FontSize>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Right</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>OrderHeaderId</rd:DefaultName>
+                      <ZIndex>2</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <TopBorder>
+                          <Color>=iif(Fields!RowType.Value=1, "LightGrey", "LightGrey")</Color>
+                          <Width>=iif(Fields!RowType.Value=1, "5pt", "1pt")</Width>
+                        </TopBorder>
+                        <BackgroundColor>=iif(Fields!RowType.Value = 1, "#00CCFF", iif(Fields!RowType.Value = 2, "#99CCFF", "#FFFFFF"))</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="OrderLineId">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Code.iiif(Fields!RowType.Value, CStr(Cstr(Fields!SellCurrencyCode.Value) + " " + CStr(CDbl(Fields!TotalSellAmount.Value))),
+CStr(Cstr(Fields!SellCurrencyCode.Value) + " " + CStr(CDbl(Fields!TotalSellAmount.Value))), 
+CStr(CDbl(Fields!ItemSellPrice.Value) * CInt(Fields!OrderedQuantity.Value)).ToString())</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>9pt</FontSize>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style>
+                            <TextAlign>Right</TextAlign>
+                          </Style>
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>OrderLineId</rd:DefaultName>
+                      <ZIndex>1</ZIndex>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <TopBorder>
+                          <Color>=iif(Fields!RowType.Value=1, "LightGrey", "LightGrey")</Color>
+                          <Width>=iif(Fields!RowType.Value=1, "5pt", "1pt")</Width>
+                        </TopBorder>
+                        <BackgroundColor>=iif(Fields!RowType.Value = 1, "#00CCFF", iif(Fields!RowType.Value = 2, "#99CCFF", "#FFFFFF"))</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+                <TablixCell>
+                  <CellContents>
+                    <Textbox Name="RowType">
+                      <CanGrow>true</CanGrow>
+                      <KeepTogether>true</KeepTogether>
+                      <Paragraphs>
+                        <Paragraph>
+                          <TextRuns>
+                            <TextRun>
+                              <Value>=Fields!Notes.Value</Value>
+                              <Style>
+                                <FontFamily>Tahoma</FontFamily>
+                                <FontSize>9pt</FontSize>
+                              </Style>
+                            </TextRun>
+                          </TextRuns>
+                          <Style />
+                        </Paragraph>
+                      </Paragraphs>
+                      <rd:DefaultName>RowType</rd:DefaultName>
+                      <Style>
+                        <Border>
+                          <Color>LightGrey</Color>
+                          <Style>Solid</Style>
+                        </Border>
+                        <TopBorder>
+                          <Color>=iif(Fields!RowType.Value=1, "LightGrey", "LightGrey")</Color>
+                          <Width>=iif(Fields!RowType.Value=1, "5pt", "1pt")</Width>
+                        </TopBorder>
+                        <BackgroundColor>=iif(Fields!RowType.Value = 1, "#00CCFF", iif(Fields!RowType.Value = 2, "#99CCFF", "#FFFFFF"))</BackgroundColor>
+                        <PaddingLeft>1mm</PaddingLeft>
+                        <PaddingRight>1mm</PaddingRight>
+                        <PaddingTop>1mm</PaddingTop>
+                        <PaddingBottom>1mm</PaddingBottom>
+                      </Style>
+                    </Textbox>
+                  </CellContents>
+                </TablixCell>
+              </TablixCells>
+            </TablixRow>
+          </TablixRows>
+        </TablixBody>
+        <TablixColumnHierarchy>
+          <TablixMembers>
+            <TablixMember />
+            <TablixMember />
+            <TablixMember />
+            <TablixMember>
+              <Visibility>
+                <Hidden>=Not Fields!IsOMSPriceVisibleInExport.Value</Hidden>
+              </Visibility>
+            </TablixMember>
+            <TablixMember />
+          </TablixMembers>
+        </TablixColumnHierarchy>
+        <TablixRowHierarchy>
+          <TablixMembers>
+            <TablixMember>
+              <KeepWithGroup>After</KeepWithGroup>
+              <RepeatOnNewPage>true</RepeatOnNewPage>
+              <KeepTogether>true</KeepTogether>
+            </TablixMember>
+            <TablixMember>
+              <Group Name="table1_Details_Group">
+                <DataElementName>Detail</DataElementName>
+              </Group>
+              <TablixMembers>
+                <TablixMember />
+              </TablixMembers>
+              <DataElementName>Detail_Collection</DataElementName>
+              <DataElementOutput>Output</DataElementOutput>
+              <KeepTogether>true</KeepTogether>
+            </TablixMember>
+          </TablixMembers>
+        </TablixRowHierarchy>
+        <DataSetName>omsOrderGroupList</DataSetName>
+        <Top>0.8381cm</Top>
+        <Height>1.40002cm</Height>
+        <Width>27.24996cm</Width>
+        <Style />
+      </Tablix>
+      <Textbox Name="textbox1">
+        <CanGrow>true</CanGrow>
+        <KeepTogether>true</KeepTogether>
+        <Paragraphs>
+          <Paragraph>
+            <TextRuns>
+              <TextRun>
+                <Value>Order List</Value>
+                <Style>
+                  <FontFamily>Tahoma</FontFamily>
+                  <FontSize>18pt</FontSize>
+                </Style>
+              </TextRun>
+            </TextRuns>
+            <Style />
+          </Paragraph>
+        </Paragraphs>
+        <rd:DefaultName>textbox1</rd:DefaultName>
+        <Height>0.8381cm</Height>
+        <Width>27.25cm</Width>
+        <ZIndex>1</ZIndex>
+        <Style>
+          <PaddingLeft>2pt</PaddingLeft>
+          <PaddingRight>2pt</PaddingRight>
+          <PaddingTop>2pt</PaddingTop>
+          <PaddingBottom>2pt</PaddingBottom>
+        </Style>
+      </Textbox>
+    </ReportItems>
+    <Height>2.23812cm</Height>
+    <Style />
+  </Body>
+  <Width>27.25cm</Width>
+  <Page>
+    <PageHeight>21cm</PageHeight>
+    <PageWidth>29.7cm</PageWidth>
+    <InteractiveHeight>11in</InteractiveHeight>
+    <InteractiveWidth>8.5in</InteractiveWidth>
+    <LeftMargin>1cm</LeftMargin>
+    <RightMargin>1cm</RightMargin>
+    <TopMargin>1cm</TopMargin>
+    <BottomMargin>1cm</BottomMargin>
+    <ColumnSpacing>1cm</ColumnSpacing>
+    <Style />
+  </Page>
+  <Description>Order List Export</Description>
+  <Author>pf</Author>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="VectorConnectionString">
+      <DataSourceReference>VectorConnectionString</DataSourceReference>
+      <rd:SecurityType>None</rd:SecurityType>
+      <rd:DataSourceID>f7963f55-ac9b-49d0-adae-2be13d7c39fc</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="omsOrderGroupList">
+      <Query>
+        <DataSourceName>VectorConnectionString</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@LoggedInUserId">
+            <Value>=Parameters!LoggedInUserId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@OrderGroupId">
+            <Value>=Parameters!OrderGroupId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@OrderHeaderId">
+            <Value>=Parameters!OrderHeaderId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@SupplierId">
+            <Value>=Parameters!SupplierId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ShipperId">
+            <Value>=Parameters!ShipperId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ClientId">
+            <Value>=Parameters!ClientId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@OrderStatusId">
+            <Value>=Parameters!OrderStatusId.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@DateOrderedFrom">
+            <Value>=Parameters!DateOrderedFrom.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@DateOrderedTo">
+            <Value>=Parameters!DateOrderedTo.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@DateRequiredFrom">
+            <Value>=Parameters!DateRequiredFrom.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@DateRequiredTo">
+            <Value>=Parameters!DateRequiredTo.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@OrderGroupNumber">
+            <Value>=Parameters!OrderGroupNumber.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@InvoiceInternalReference">
+            <Value>=Parameters!InvoiceInternalReference.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Top">
+            <Value>=Parameters!Top.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Detail">
+            <Value>=Parameters!Detail.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>dbo.omsOrderGroupList</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="OrderGroupId">
+          <DataField>OrderGroupId</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="OrderHeaderId">
+          <DataField>OrderHeaderId</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="OrderLineId">
+          <DataField>OrderLineId</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="RowType">
+          <DataField>RowType</DataField>
+          <rd:TypeName>System.Byte</rd:TypeName>
+        </Field>
+        <Field Name="Email">
+          <DataField>Email</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ClientName">
+          <DataField>ClientName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="DateOrdered">
+          <DataField>DateOrdered</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="SupplierName">
+          <DataField>SupplierName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="OrderGroupNumber">
+          <DataField>OrderGroupNumber</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Notes">
+          <DataField>Notes</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="DateRequired">
+          <DataField>DateRequired</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="OrderStatus">
+          <DataField>OrderStatus</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="OrderNumber">
+          <DataField>OrderNumber</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="BuyCurrencyCode">
+          <DataField>BuyCurrencyCode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="SellCurrencyCode">
+          <DataField>SellCurrencyCode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ProductName">
+          <DataField>ProductName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="DistributionCurrencyCode">
+          <DataField>DistributionCurrencyCode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="TotalBuyAmount">
+          <DataField>TotalBuyAmount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="TotalSellAmount">
+          <DataField>TotalSellAmount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="OrderedQuantity">
+          <DataField>OrderedQuantity</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="TotalDistributionAmount">
+          <DataField>TotalDistributionAmount</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Pallets">
+          <DataField>Pallets</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="vOMSProductCode">
+          <DataField>vOMSProductCode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ItemBuyPrice">
+          <DataField>ItemBuyPrice</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="OrderStatusId">
+          <DataField>OrderStatusId</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="ItemSellPrice">
+          <DataField>ItemSellPrice</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="ItemDistributionCost">
+          <DataField>ItemDistributionCost</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="NewOrderedQuantity">
+          <DataField>NewOrderedQuantity</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="PackagingName">
+          <DataField>PackagingName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ShipperId">
+          <DataField>ShipperId</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="HasChild">
+          <DataField>HasChild</DataField>
+          <rd:TypeName>System.Boolean</rd:TypeName>
+        </Field>
+        <Field Name="IsOMSPriceVisibleInExport">
+          <DataField>IsOMSPriceVisibleInExport</DataField>
+          <rd:TypeName>System.Boolean</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportParameters>
+    <ReportParameter Name="DateOrderedFrom">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>DateOrderedFrom</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="DateOrderedTo">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>DateOrderedTo</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Top">
+      <DataType>Integer</DataType>
+      <Prompt>Top</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Detail">
+      <DataType>Integer</DataType>
+      <Prompt>Detail</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LoggedInUserId">
+      <DataType>Integer</DataType>
+      <Prompt>LoggedInUserId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="OrderGroupId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>OrderGroupId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="OrderHeaderId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>OrderHeaderId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="SupplierId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>SupplierId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ShipperId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>ShipperId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ClientId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>ClientId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="OrderStatusId">
+      <DataType>Integer</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>OrderStatusId</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="WaitingForApproval">
+      <DataType>Boolean</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>WaitingForApproval</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="DateRequiredFrom">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>DateRequiredFrom</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="DateRequiredTo">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>DateRequiredTo</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="OrderGroupNumber">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>OrderGroupNumber</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="InvoiceInternalReference">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />
+        </Values>
+      </DefaultValue>
+      <Prompt>InvoiceInternalReference</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <Code>Public Function iiif(RowType as Integer, p1 as Object, p2 as Object, p3 as Object) as Object
+
+If RowType = 1 Then Return p1
+If RowType = 2 Then Return p2
+If RowType = 3 Then Return p3
+If RowType = 4 Then Return p3
+
+End Function
+
+
+Public Shared Function StripHTML(htmlString As String) As String
+	Dim pattern As String ="&lt;(.|" + vbCrLf + ")*?&gt;"
+	Return System.Text.RegularExpressions.Regex.Replace(htmlString, pattern, String.Empty)
+End Function
+</Code>
+  <Language>en-US</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Cm</rd:ReportUnitType>
+  <rd:ReportID>af542dbd-0842-4a32-ba84-91ae05c2dcde</rd:ReportID>
+</Report>

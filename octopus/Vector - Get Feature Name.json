@@ -1,0 +1,31 @@
+{
+  "Id": "ActionTemplates-103",
+  "Name": "Vector - Get Feature Name",
+  "Description": "Given the name of a package, parses the build metadata portion of the package string to identify the feature branch name. ",
+  "ActionType": "Octopus.Script",
+  "Version": 1,
+  "CommunityActionTemplateId": null,
+  "Properties": {
+    "Octopus.Action.Script.ScriptSource": "Inline",
+    "Octopus.Action.Script.Syntax": "PowerShell",
+    "Octopus.Action.Script.ScriptBody": "\n$pkgInfo=$OctopusParameters[\"Octopus.Action[\"+ $StepName +\"].Package.NuGetPackageVersion\"] -split \"\\.\"\n\nSet-OctopusVariable -name \"FeatureName\" -value $pkgInfo[3]\n\n\n\n\n\n"
+  },
+  "Parameters": [
+    {
+      "Id": "a8f0317d-7e49-4230-b662-79685ff28178",
+      "Name": "StepName",
+      "Label": "Package Step Name",
+      "HelpText": "The name of the step to read the package name from",
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    }
+  ],
+  "$Meta": {
+    "ExportedAt": "2018-01-08T09:36:08.797Z",
+    "OctopusVersion": "4.0.8",
+    "Type": "ActionTemplate"
+  }
+}

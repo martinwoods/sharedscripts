@@ -1,0 +1,42 @@
+{
+  "Id": "ActionTemplates-22",
+  "Name": "Vector - Get Client Info",
+  "Description": "Get Client Information based on a hard-coded lookup table using the Client value from JIRA",
+  "ActionType": "Octopus.Script",
+  "Version": 3,
+  "CommunityActionTemplateId": null,
+  "Properties": {
+    "Octopus.Action.Script.ScriptSource": "Inline",
+    "Octopus.Action.Script.Syntax": "PowerShell",
+    "Octopus.Action.Script.ScriptBody": "function Get-Data {\n\t\n\t# CSV Data is stored in VectorSystemsLookup.xlsx under the build_scripts repo in GIT\n\t# When new data needs to be added, update the excel file and export CSV before updating here\n\t# Do not update this powershell script without adding the to excel file first\n\t\t\t\t$csvData=@\"\n\t\t\tJIRA Client Name,Company,ID,ICAO,Epics\nAAL - American Airlines,American Airlines,269,AAL,VESB-601;VECTWO-5712;VECTWO-4058;\n,Air Asia Thai,190,AIQ,VESB-1808;\n,LATAM Colombia,105,ARE,\n,US Airways,331,AWE,\n,Air Asia Indonesia,200,AWQ,\n,Air Asia Malaysia,185,AXM,\nAZA - Alitalia,Alitalia,140,AZA,VESB-1557;VECTWO-9846;VECTWO-8729;\nBRU - Brussels Airlines,Brussels Airlines,4,BEL,VECTWO-6716;VECTWO-6521;VECTWO-4059;\n,TUI Nordics,0,BLX,VESB-1225;\nDLH - Miles & More,Lufthasa (Miles & More),75,DLH,VESB-983;VESB-707;VECTWO-10121;VECTWO-5362\n,LATAM Argentina,130,DSM,\nEDW - Edelweiss,Edelweiss,65,EDW,VESB-334;VECTWO-8529;VECTWO-4060;\nEIN - Aer Lingus,Aer Lingus,155,EIN,VESB-1592;VECTWO-9847;VECTWO-9237;\nEW - Eurowings,Eurowings,2,EWG,VESB-376;VECTWO-7239;VECTWO-4057;\nEXS - Jet2,Jet2,85,EXS,VESB-936;VECTWO-6412;VECTWO-6400;\n,Air Asia Philippine,210,EZD,\nFDB - Fly Dubai,FlyDubai,225,FDB,VESB-2098;VECTWO-14939;VECTWO-13122;\n,ASL Airlines,5,FPO,VESB-868;VECTWO-9555;\nHAL - Hawaiian,Hawaian,115,HAL,VESB-1363;VECTWO-8323;VECTWO-6456;\n,Air Asia India,215,IAD,\nICE - Iceland Air,Icelandair,45,ICE,VESB-230;VECTWO-5527;VECTWO-4062;\n,Air Asia Indonesia X,205,IDX,\nTUI fly Belgium (Jetairfly),TUI Jetairfly,80,JAF,VESB-743;VECTWO-15117;\nJOON - Boost,JOON,165,JON,VESB-2000;VECTWO-13061;VECTWO-12096;VECTWO-12006\nLAN - LATAM Chile,LATAM Chile,125,LAN,\nLNE - LATAM Ecuador,LATAM Ecuador,135,LNE,\nLPE - LATAM Peru,LATAM Peru,120,LPE,\nNKS - Spirit,Spirit,30,NKS,VESB-962;VECTWO-5402;VECTWO-4063;\nRAM - Royal Air Maroc,Royal Air Maroc,230,RAM,VESB-2563;VECTWO-14938;VECTWO-14485;\nRIM - Retail inMotion,Retail inMotion,1,RIM,\nRYR - Ryanair,Ryanair,61,RYR,VESB-232;VECTWO-6486;VECTWO-5360;VECTWO-4056\nSKU - Sky Airlines,Sky Airline,70,SKU,VESB-527;VECTWO-4064;\nSTK - Stobart Air,Stobart Air,150,STK,VECTWO-14847;VECTWO-7697;VECTWO-4065;\nSWR - Swissair,Swiss,100,SWR,VESB-1664;VECTWO-10215;VECTWO-5948;\nSXD - Sun Express Germany,SunExpress Germany,15,SXD,VESB-400;VECTWO-7385;VECTWO-4066;\nSXS - Sun Express Turkey,SunExpress Turkey,25,SXS,VECTWO-8352;VECTWO-4067;\n,Air Asia Thai X,195,TAX,\nTCX - Thomas Cook,Thomas Cook UK,95,TCX,VESB-1130;VECTWO-6413;VECTWO-6362;\nTUI fly NL (Arkefly),TUI NL (ArkeFly),10,TFL,VESB-705;VECTWO-15118;VECTWO-8533;VECTWO-4068\nTOM - TUI Thomson,TUI Thomson,50,TOM,VESB-233;VECTWO-10886;VECTWO-5363;\nTUI Fly Germany,TUI Fly Germany,35,TUI,VESB-231;VECTWO-14381;VECTWO-10122;VECTWO-8225\nTVF - Transavia,Transavia France,90,TVF,VESB-1084;VECTWO-7678;VECTWO-6233;\nVIV - Viva Aerobus,Viva Aerobus,40,VIV,VESB-272;VECTWO-5405;VECTWO-4071;\n,Thomas Cook Scandinavia,170,VKG,VECTWO-13917;\nVOZ - Virgin Australia,Virgin Australia,160,VOZ,VESB-1809;VECTWO-10507;VECTWO-10230;\n,Air Asia Japan,220,WAJ,\nWOW - WOW Airlines,WOW Air,110,WOW,VESB-1959;VECTWO-8025;VECTWO-7601;VECTWO-6978\nXAX - Air Asia,Air Asia Malaysia X,145,XAX,\n\"@\n\n\n\tConvertFrom-CSV $csvData\n\n}\n\nfunction Get-DataForClient {\n\tParam (\n\t\t[string]$JIRAClientName,\n        [string]$JIRAEpicID\n\t);\n    If( -not [string]::IsNullOrEmpty($JIRAEpicId) ){\n        $data=Get-Data | Where-Object { $_.Epics -like \"*$JIRAEpicID*\" }\n    } else {\n        $data=Get-Data | Where-Object { $_.\"JIRA Client Name\" -eq $JIRAClientName }\n    }\n\t\n\t$data.ICAO\n\t\n\tSet-OctopusVariable -name \"Company\" -value $data.Company\n\tSet-OctopusVariable -name \"CompanyID\" -value $data.ID\n\tSet-OctopusVariable -name \"CompanyICAO\" -value $data.ICAO\n\t\n\t\n}\n\nGet-DataForClient -JIRAClientName $JIRAClientName -JIRAEpicId $JIRAEpicId"
+  },
+  "Parameters": [
+    {
+      "Id": "a8de85d4-1c00-4924-9927-024845fa23c2",
+      "Name": "JIRAClientName",
+      "Label": "Value of the Client field from JIRA",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    },
+    {
+      "Id": "0408a761-a334-45e9-9b4d-c44e47efc7d2",
+      "Name": "JIRAEpicId",
+      "Label": "Epic ID from JIRA to lookup client info",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    }
+  ],
+  "$Meta": {
+    "ExportedAt": "2018-01-09T09:46:40.576Z",
+    "OctopusVersion": "4.1.7",
+    "Type": "ActionTemplate"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "Id": "ActionTemplates-21",
+  "Name": "Vector - Get JIRA Field",
+  "Description": "Get the value of a custom field from JIRA and set using Set-OctopusVariable",
+  "ActionType": "Octopus.Script",
+  "Version": 4,
+  "CommunityActionTemplateId": null,
+  "Properties": {
+    "Octopus.Action.Script.ScriptSource": "Inline",
+    "Octopus.Action.Script.Syntax": "PowerShell",
+    "Octopus.Action.Script.ScriptBody": "function Jira-QueryApi\n{\n    Param (\n        [Uri]$Query,\n        [string]$Username,\n        [string]$Password\n    );\n\n    Write-Host \"Querying JIRA API $($Query.AbsoluteUri)\"\n\n    # Prepare the Basic Authorization header - PSCredential doesn't seem to work\n    $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes((\"{0}:{1}\" -f $Username,$Password)))\n    $headers = @{Authorization=(\"Basic {0}\" -f $base64AuthInfo)}\n\n    # Execute the query\n    Invoke-RestMethod -Uri $Query -Headers $headers\n}\n\nfunction Get-JIRACustomFieldValue\n{\n    Param (\n        [string]$ServerURL,\n        [string]$IssueKey,\n        [string]$FieldID,\n        [string]$Username,\n        [string]$Password\n    );\n\n     \n    $query= New-Object -TypeName System.Uri -ArgumentList (\"https://\" + $ServerURL + \"/rest/api/2/issue/\" + $IssueKey + \"?fields=\" + $FieldId)\n    $data=Jira-QueryApi -Query $query -Username $Username -Password $Password\n\n   \n    \n    if($data.fields.\"$FieldId\".GetType().Name -eq \"PSCustomObject\"){\n        $value=$data.fields.\"$FieldId\".value\n    } else {\n        $value=$data.fields.\"$FieldId\"\n    }\n   \n    return $value\n}\n\nfunction Get-JIRACustomFieldID\n{\n\tParam (\n        [string]$ServerURL,\n        [string]$IssueKey,\n        [string]$FieldName,\n        [string]$Username,\n        [string]$Password\n    );\n\t\n\t$query=New-Object -TypeName System.Uri -ArgumentList (\"https://\" + $ServerURL + \"/rest/api/2/issue/\"+ $IssueKey +\"/editmeta\")\n    Write-Host $query.PathAndQuery\n\t$data=Jira-QueryApi -Query $query -Username $Username -Password $Password\n\t\n\t$data.fields.PSObject.Properties | ForEach-Object {\n        If ($_.Name.ToLower() -eq $FieldName.ToLower() -or\n            $_.Value.name.ToLower() -eq $FieldName.ToLower()) {\n            Return $_.Name\n        }\n    }\n\n\t\n}\nfunction Get-JIRAFieldToOctoVar {\n    Param (\n        [string]$ServerURL,\n        [string]$IssueKey,\n        [string]$JIRAFieldName,\n\t\t[string]$OutputFieldName,\n        [string]$Username,\n        [string]$Password\n    );\n    $fieldid=Get-JIRACustomFieldId  -FieldName $JIRAFieldName -ServerURL $ServerURL -IssueKey $IssueKey -Username $Username -Password $Password\n    $fieldvalue=Get-JIRACustomFieldValue -FieldId $fieldid -ServerURL $ServerURL -IssueKey $IssueKey -Username $Username -Password $Password\n\n    Set-OctopusVariable -name \"$OutputFieldName\" -value \"$fieldvalue\"\n}\n\nGet-JIRAFieldToOctoVar -JIRAFieldName $VectorJIRAFieldName -OutputFieldName $VectorOutputFieldName -ServerURL $VectorJIRAServer -IssueKey $VectorJIRAIssue -Username $VectorJIRAUser -Password $VectorJIRAPassword"
+  },
+  "Parameters": [
+    {
+      "Id": "2ddf3f39-d3aa-48ed-978a-0dc0b6c4ec50",
+      "Name": "VectorJIRAFieldName",
+      "Label": "The name of the JIRA field to retrieve",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    },
+    {
+      "Id": "a5c4ba00-332a-41b0-9e3d-25cd502596d6",
+      "Name": "VectorJIRAServer",
+      "Label": "JIRA Server address",
+      "HelpText": null,
+      "DefaultValue": "support.retailinmotion.com",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    },
+    {
+      "Id": "fe2e7e13-cea6-46b9-9249-6ac07e0ec175",
+      "Name": "VectorJIRAIssue",
+      "Label": "Issue Key",
+      "HelpText": "The JIRA Issue key to look up",
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    },
+    {
+      "Id": "8b2bc3dc-47ce-403c-b958-ac7f7fcbd68f",
+      "Name": "VectorJIRAUser",
+      "Label": "JIRA User to access the API",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    },
+    {
+      "Id": "c55ffdb8-478b-4383-be70-487a6df0b2c3",
+      "Name": "VectorJIRAPassword",
+      "Label": "Password to use when accessing the API",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "Sensitive"
+      },
+      "Links": {}
+    },
+    {
+      "Id": "1f9ac7c9-4a68-4c13-a15a-4bd3eed83bb3",
+      "Name": "VectorOutputFieldName",
+      "Label": "The name to give to the output variable",
+      "HelpText": null,
+      "DefaultValue": "",
+      "DisplaySettings": {
+        "Octopus.ControlType": "SingleLineText"
+      },
+      "Links": {}
+    }
+  ],
+  "$Meta": {
+    "ExportedAt": "2018-01-09T09:35:33.668Z",
+    "OctopusVersion": "4.1.7",
+    "Type": "ActionTemplate"
+  }
+}

@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#
+# Given the name of a 'system', set kube context, namespace and TILLER_NAMESPACE
+# Allows easier switching of kubernetes clusters 
+# Keith Douglas
+# 02 May 2019
+#
+
+target=$1
+
+
+if [ $0 != "-bash" ]; then
+	echo "This script must be called using dot-space syntax to allow environment variables to be set in parent shell"
+	echo "e.g. . $0 $1"
+	exit 1
+fi 
+if [ -z $target ]; then
+	echo "No target system specified."
+	echo "Usage:"
+	echo "$0 [system]"
+	echo ""
+	echo "This script will use kubectx and kubens to switch kubectl to use the target system."
+	echo "It also sets the TILLER_NAMESPACE environment variable for use with helm."
+	echo "Note: Script must be invoked using dot-space syntax to allow environment variable to be created in parent shell."
+	echo "e.g. . $0 rim-dev"
+else 
+
+	declare -A context=( [rim-dev]=rim-dev-eks-eu [rim-test]=rim-test-eks-eu [edw-uat]=edw-uat-eks-eu )
+	declare -A namespace=( [rim-dev]=rim-dev [rim-test]=rim-test [edw-uat]=edw-uat )
+
+	if [ -z ${context[$target]} ]; then
+		echo "Could not find kube context for $target"
+	elif [ -z $namespace[$target]} ]; then
+		echo "Could not find namespace for $target"
+	else 
+		echo "Switching context and namespace to $target"
+		kubectx ${context[$target]}
+		kubens ${namespace[$target]}
+		export TILLER_NAMESPACE=${namespace[$target]}
+	fi
+
+fi

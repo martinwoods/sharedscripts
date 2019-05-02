@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="VECTWO-15351">
+  <ConnectionProperties>
+    <Extension>SQL</Extension>
+    <ConnectString>Data Source=rimtest-sql-04;Initial Catalog=VECTWO-15351</ConnectString>
+  </ConnectionProperties>
+  <DataSourceID>f35e8981-5013-4b3b-8cfa-b9168bf42505</DataSourceID>
+</RptDataSource>
