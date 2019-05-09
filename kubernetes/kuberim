@@ -26,7 +26,7 @@ if [ -z $target ]; then
 	echo "e.g. . $0 rim-dev"
 else 
 
-	declare -A context=( [rim-dev]=rim-dev-eks-eu [rim-test]=rim-test-eks-eu [edw-uat]=edw-uat-eks-eu [mcabin-dev]=rim-dev-eks-eu [mcabin-test]=rim-test-eks-eu)
+	declare -A context=( [rim-dev]=rim-dev-eks-eu [rim-test]=rim-test-eks-eu [edw-uat]=edw-uat-eks-eu [mcabin-dev]=rim-dev-eks-eu [mcabin-test]=rim-test-eks-eu )
 	declare -A namespace=( [rim-dev]=rim-dev [rim-test]=rim-test [edw-uat]=edw-uat [mcabin-dev]=mcabin-dev [mcabin-test]=mcabin-test )
 
 	if [ -z ${context[$target]} ]; then
