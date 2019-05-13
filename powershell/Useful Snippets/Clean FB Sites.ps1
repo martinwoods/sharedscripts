@@ -1,5 +1,9 @@
 ﻿#
 # This script will loop through a comma seperated list of feature branch tickets (in $siteList), 
+# Use the following SQL query on rimtest-sql-02 to get a list of active DBs;
+#
+# SELECT name FROM master.dbo.sysdatabases WHERE name LIKE 'VECTWO-%' 
+#
 # check their status matches either Closed or For Regression in JIRA, and if so, 
 # trigger a delete of that feature branch via octopus
 # Populate the $siteList, $jiraPassword and $octopusApiKey variables to run
