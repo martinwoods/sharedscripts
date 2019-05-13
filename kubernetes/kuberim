@@ -10,6 +10,24 @@
 target=$1
 
 
+# Declare array to store context and namespace, keyed off system name
+declare -A context=( 
+	[rim-dev]=rim-dev-eks-eu 
+	[rim-test]=rim-test-eks-eu 
+	[edw-uat]=edw-uat-eks-eu 
+	[mcabin-dev]=rim-dev-eks-eu 
+	[mcabin-test]=rim-test-eks-eu 
+	[edw-prod]=edw-prod-euw1 
+)
+declare -A namespace=( 
+	[rim-dev]=rim-dev 
+	[rim-test]=rim-test 
+	[edw-uat]=edw-uat 
+	[mcabin-dev]=mcabin-dev 
+	[mcabin-test]=mcabin-test 
+	[edw-prod]=edw-prod 
+)
+
 if [ $0 != "-bash" ]; then
 	echo "This script must be called using dot-space syntax to allow environment variables to be set in parent shell"
 	echo "e.g. . $0 $1"
@@ -18,30 +36,20 @@ fi
 if [ -z $target ]; then
 	echo "No target system specified."
 	echo "Usage:"
-	echo "$0 [system]"
+	echo ". kuberim [system]"
 	echo ""
 	echo "This script will use kubectx and kubens to switch kubectl to use the target system."
 	echo "It also sets the TILLER_NAMESPACE environment variable for use with helm."
 	echo "Note: Script must be invoked using dot-space syntax to allow environment variable to be created in parent shell."
-	echo "e.g. . $0 rim-dev"
+	echo "e.g. . kuberim rim-dev"
+	echo "Available systems;"
+	for i in "${!context[@]}"
+	do
+		echo -e "\t$i"
+	done
+	
 else 
 
-	declare -A context=( 
-		[rim-dev]=rim-dev-eks-eu 
-		[rim-test]=rim-test-eks-eu 
-		[edw-uat]=edw-uat-eks-eu 
-		[mcabin-dev]=rim-dev-eks-eu 
-		[mcabin-test]=rim-test-eks-eu 
-		[edw-prod]=edw-prod-euw1 
-	)
-	declare -A namespace=( 
-		[rim-dev]=rim-dev 
-		[rim-test]=rim-test 
-		[edw-uat]=edw-uat 
-		[mcabin-dev]=mcabin-dev 
-		[mcabin-test]=mcabin-test 
-		[edw-prod]=edw-prod 
-	)
 
 	if [ -z ${context[$target]} ]; then
 		echo "Could not find kube context for $target"
