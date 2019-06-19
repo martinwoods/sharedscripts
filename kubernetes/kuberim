@@ -14,18 +14,20 @@ target=$1
 declare -A context=( 
 	[rim-dev]=rim-dev-eks-eu 
 	[rim-test]=rim-test-eks-eu 
-	[edw-uat]=edw-uat-eks-eu 
+	[edw-uat]=edw-uat-eks-eu  
+	[edw-prod]=edw-prod-euw1 
 	[mcabin-dev]=rim-dev-eks-eu 
 	[mcabin-test]=rim-test-eks-eu 
-	[edw-prod]=edw-prod-euw1 
+	[nks-uat]=nks-uat-use1
 )
 declare -A namespace=( 
 	[rim-dev]=rim-dev 
 	[rim-test]=rim-test 
 	[edw-uat]=edw-uat 
+	[edw-prod]=edw-prod 
 	[mcabin-dev]=mcabin-dev 
 	[mcabin-test]=mcabin-test 
-	[edw-prod]=edw-prod 
+	[nks-uat]=nks-uat
 )
 
 if [ $0 != "-bash" ]; then
