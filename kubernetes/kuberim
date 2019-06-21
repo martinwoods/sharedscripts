@@ -19,6 +19,7 @@ declare -A context=(
 	[mcabin-dev]=rim-dev-eks-eu 
 	[mcabin-test]=rim-test-eks-eu 
 	[nks-uat]=nks-uat-use1
+	[asa-uat]=asa-uat-usw2
 )
 declare -A namespace=( 
 	[rim-dev]=rim-dev 
@@ -28,6 +29,7 @@ declare -A namespace=(
 	[mcabin-dev]=mcabin-dev 
 	[mcabin-test]=mcabin-test 
 	[nks-uat]=nks-uat
+	[asa-uat]=asa-uat
 )
 
 if [ $0 != "-bash" ]; then
