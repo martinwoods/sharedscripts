@@ -107,10 +107,18 @@ if (Test-Path $secedt) {
 }
 $keepSids = ""
 secedit /export /cfg $export
-$sids = ((select-string $export -pattern "SeServiceLogonRight").line.Split("=").Trim()[1]) -Split ",\*"
+$sids = ((select-string $export -pattern "SeServiceLogonRight").line.Split("=").Trim()[1]) -Split ","
 foreach ($sid in $sids){
-    if ($sid -in $localUsers.SID -and $sid -notin $usersToRemove.SID){
-        $keepSids += ",*$sid"
+    $sid = $sid.Replace("*","")
+    if (($sid -in $localUsers.SID -or $sid -in $localUsers.name) -and ($sid -notin $usersToRemove.SID -or $sid -notin $usersToRemove.name)){
+        #Entries added by the account name, not SID, need to be added back without the asterix, otherwise they will be removed during the import
+        $sidPattern = 'S-\d-\d+-(\d+-){1,14}\d+'
+        if ($sid -match $sidPattern){
+            $keepSids += ",*$sid"
+        }
+        else{
+            $keepSids += ",$sid"
+        }
     }
 }
 $keepSids = $keepSids.Substring(1, $keepSids.Length - 1)
