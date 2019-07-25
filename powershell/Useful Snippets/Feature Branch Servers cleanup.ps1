@@ -1,11 +1,11 @@
 #Run this when there are no FB deployments or deletions running (maybe temporarily disable FB Deploy project?)
 #Get the list of present DBs from rimtest-sql-02 and rimtest-sql-05 and put them together in $presentDBlist by using the SQL >>SELECT name FROM master.dbo.sysdatabases WHERE name NOT IN ('master','model','msdb','tempdb')<< 
-#Get the list of present sites from rimtest-web-03 (should be the same on 04) and put it in $currentSiteList by using this script in elevated PS: >>Import-Module WebAdministration; (Get-Website).Name<<
+#Get the list of present sites from rimtest-web-03 (should be the same on 04) and put it in $currentSiteList by using this script in elevated PS: >>Import-Module WebAdministration; (Get-Website).Name | Sort<<
 #Run the first section of the script (until the first Exit on line 45) - run the project FB delete in Octopus for the feature branches listed after "Run FB Delete"; copy the displayed declaration of $keepFB = @(....
 #On each set of machines types tied to the FB environment, run the needed sections in elevated PS, making sure to get the declaration of $keepFB = @(... in first
 
-$presentDBlist = @("PREO-843", "QA-PREO-EDW", "QA-PREO-RIM", "QA-SECSCAN-RYR", "VECTWO-19279", "VECTWO-27125", "VECTWO-28080", "VECTWO-28656", "VECTWO-28687", "VECTWO-29367", "VECTWO-29810", "VECTWO-30041", "VECTWO-30132", "VECTWO-30346", "VECTWO-30657", "VECTWO-30711", "VECTWO-30809", "VECTWO-30855", "VECTWO-30955", "VECTWO-31080", "VECTWO-31203", "VECTWO-31250", "VECTWO-31335", "VECWTO-21816")
-$currentSiteList = @("DLH", "PREO-843", "QA-PREO-EDW", "QA-PREO-RIM", "QA-SECSCAN-RYR", "VECTWO-19279", "VECTWO-27125", "VECTWO-28080", "VECTWO-28656", "VECTWO-28687", "VECTWO-29367", "VECTWO-29810", "VECTWO-30041", "VECTWO-30132", "VECTWO-30346", "VECTWO-30657", "VECTWO-30711", "VECTWO-30809", "VECTWO-30855", "VECTWO-30955", "VECTWO-31080", "VECTWO-31203", "VECTWO-31250", "VECTWO-31335", "VRECTEST2")
+$presentDBlist = @()
+$currentSiteList = @()
 
 
 $runFBDelete = @()
@@ -87,7 +87,8 @@ $localUsers | ForEach-Object{
 $servicesToRemove = @()
 $localServices = Get-WmiObject win32_service | Select-Object name, startname
 $localServices | ForEach-Object {
-    if ($_.startname.Replace("`.`\") -in $usersToRemove) {
+    $logonUser = ($_.startname).Replace("`.`\","")
+    if ($logonUser -in $usersToRemove) {
         $servicesToRemove += $_.Name
     }
 }
@@ -110,7 +111,7 @@ secedit /export /cfg $export
 $sids = ((select-string $export -pattern "SeServiceLogonRight").line.Split("=").Trim()[1]) -Split ","
 foreach ($sid in $sids){
     $sid = $sid.Replace("*","")
-    if (($sid -in $localUsers.SID -or $sid -in $localUsers.name) -and ($sid -notin $usersToRemove.SID -or $sid -notin $usersToRemove.name)){
+    if (($sid -in $localUsers.SID -or $sid -in $localUsers.name) -and ($sid -notin $usersToRemove.SID -and $sid -notin $usersToRemove.name)){
         #Entries added by the account name, not SID, need to be added back without the asterix, otherwise they will be removed during the import
         $sidPattern = 'S-\d-\d+-(\d+-){1,14}\d+'
         if ($sid -match $sidPattern){
@@ -136,7 +137,7 @@ $appPoolsToRemove | ForEach-Object{
     Remove-WebAppPool $_
 }
 $siteFoldersToRemove | ForEach-Object{
-    Remove-Item -Path $_ -recurse -Force -WhatIf
+    Remove-Item -Path $_ -recurse -Force
 }
 $servicesToRemove | ForEach-Object{
     Stop-Service $_
@@ -164,8 +165,6 @@ $usersToRemove | ForEach-Object{
         Remove-Item -Path $userFolder -Force -Recurse
     }
 }
-
-
 
 
 
