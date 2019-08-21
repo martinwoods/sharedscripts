@@ -180,6 +180,8 @@ function addconfig {
 		echo "Going to add $name cluster in $region using $profile"
 
 		aws eks --region $region update-kubeconfig --name $name --kubeconfig $KUBECONFIGDIR/$name --profile $profile
+		echo "Reloading bashrc to regenerate kubeconfig variable"
+		source ~/.bashrc
 	fi
 
 
