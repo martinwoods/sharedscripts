@@ -25,6 +25,7 @@ fi
 region=""
 clustername=""
 profile=""
+namespace=""
 
 if [ "$#" -eq 0 ]
 then
@@ -32,8 +33,11 @@ then
 # If we only get one arg, it's the target
 elif [ "$#" -eq 1 ] 
 then	
-	mode="contextswitch"
-	contextswitch $1
+	if [ $1 != "ns" ] && [ $1 != "add" ] 
+	then
+		mode="contextswitch"
+		contextswitch $1
+	fi
 else 
 # otherwise, check the args given
 	while :; do
@@ -43,6 +47,16 @@ else
 			;;
 		add)
 			mode="add"
+			;;
+		ns)
+			mode="nsswitch"
+			if [ "$2" ]; then
+				namespace=$2
+				shift
+			else
+				echo 'Error: $0 ns must be followed by the name of the target namespace'
+				die 'Error: $0 ns must be followed by the name of the target namespace'
+			fi
 			;;
 		--region)
 			if [ "$2" ]; then
@@ -83,6 +97,9 @@ else
 	if [ $mode = "add" ] 
 	then
 		addconfig $region $clustername $profile 
+	elif [  $mode = "nsswitch" ]
+	then
+		nsswitch $namespace
 	fi
 fi
 
@@ -130,6 +147,14 @@ function contextswitch() {
 
 }
 
+# Switch into the given namespace
+function nsswitch(){
+	namespace=$1
+
+	kubens $namespace
+	export TILLER_NAMESPACE=$namespace
+}	
+
 
 function usage() {
 
@@ -155,6 +180,10 @@ function usage() {
 	echo -e "\t --profile - [Optional] If you have multiple AWS profiles configured, specify which one to use"
 	echo -e "\t Note: This usage requires the AWS CLI to be installed and configured with your credentials"
 	echo -e "\t See https://knowledge.retailinmotion.com/display/DEVOPS/AWS+EKS+Access for setup instructions"
+
+	echo -e "\n\t. kuberim ns [target namespace]"
+	echo -e "\tSwitches into the target namespace on the current cluster"
+	echo -e "\tUses kubens to set the kubernetes namespace and also sets TILLER_NAMESPACE environment variable"
 
 	echo "Prerequisites:"
 	echo "- aws cli - You must have the aws cli installed, configured and available on PATH"
