@@ -30,14 +30,12 @@ namespace=""
 if [ "$#" -eq 0 ]
 then
 	usage
-# If we only get one arg, it's the target
-elif [ "$#" -eq 1 ] 
-then	
-	if [ $1 != "ns" ] && [ $1 != "add" ] 
-	then
-		mode="contextswitch"
-		contextswitch $1
-	fi
+# If there's no mode specified, default to contextswitch
+elif [ $1 != "ns" ] && [ $1 != "add" ] 
+then
+	mode="contextswitch"
+	contextswitch $1 $2
+
 else 
 # otherwise, check the args given
 	while :; do
@@ -111,6 +109,13 @@ fi
 function contextswitch() {
 
 	target=$1
+	namespace=$2
+
+	# if no namespace is specified, use the target name (e.g. rim-dev, rim-test etc..)
+	if [ -z $namespace ]
+	then
+		namespace=$target
+	fi
 	echo "Switching into $target"
 	if [ -z $target ]; then
 		echo "Error No target system specified."
@@ -133,10 +138,10 @@ function contextswitch() {
 			contextname=$KUBERIM_CONF_contexts_name
 			
 			
-			echo "Switching context and namespace to $target"
+			echo "Switching context to $target and namespace to $namespace"
 			kubectx $contextname
-			kubens $target
-			export TILLER_NAMESPACE=$target
+			kubens $namespace
+			export TILLER_NAMESPACE=$namespace
 			
 		else 
 			echo "Error: Unable to find kubeconfig file for $target in $KUBECONFIGDIR"; 
