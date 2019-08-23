@@ -165,9 +165,10 @@ function usage() {
 
 	echo "Usage:"
 	echo "Simplest usage, to switch context into a given cluster;"
-	echo -e "\t. kuberim [system]"
+	echo -e "\t. kuberim [system] [namespace]"
 	echo -e "\tThis will search for kubeconfig files matching the given system name and"
 	echo -e "\tthen will use kubectx and kubens to switch kubectl to use the target system."
+	echo =e "\tIf namespace is specified, will also switch into the given namespace, otherwise will assume system name is the same as namespace"
 	echo -e "\tIt also sets the TILLER_NAMESPACE environment variable for use with helm."
 	echo -e "\tNote: Script must be invoked using dot-space syntax to allow environment variable to be created in parent shell."
 	echo -e "\te.g. . kuberim rim-dev"
