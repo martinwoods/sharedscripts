@@ -3,67 +3,240 @@
 #
 # Given the name of a 'system', set kube context, namespace and TILLER_NAMESPACE
 # Allows easier switching of kubernetes clusters 
+# Additionally, can add a new context using aws eks cli 
 # Keith Douglas
 # 02 May 2019
 #
+main() {
 
-target=$1
+# Check that we know where to get the kubeconfig from (and to store new ones in)
+if [ -z $KUBECONFIGDIR ]
+then 
+	echo "Error: KUBECONFIGDIR environment variable must be set to the path in which your KUBECONFIG files are/will be stored"
+fi
 
-
-# Declare array to store context and namespace, keyed off system name
-declare -A context=( 
-	[rim-dev]=rim-dev-eks-eu 
-	[rim-test]=rim-test-eks-eu 
-	[edw-uat]=edw-uat-eks-eu  
-	[edw-prod]=edw-prod-euw1 
-	[mcabin-dev]=rim-dev-eks-eu 
-	[mcabin-test]=rim-test-eks-eu 
-	[nks-uat]=nks-uat-use1
-	[asa-uat]=asa-uat-usw2
-)
-declare -A namespace=( 
-	[rim-dev]=rim-dev 
-	[rim-test]=rim-test 
-	[edw-uat]=edw-uat 
-	[edw-prod]=edw-prod 
-	[mcabin-dev]=mcabin-dev 
-	[mcabin-test]=mcabin-test 
-	[nks-uat]=nks-uat
-	[asa-uat]=asa-uat
-)
-
+# Check invocation method
 if [ $0 != "-bash" ]; then
 	echo "This script must be called using dot-space syntax to allow environment variables to be set in parent shell"
 	echo "e.g. . $0 $1"
 	exit 1
 fi 
-if [ -z $target ]; then
-	echo "No target system specified."
-	echo "Usage:"
-	echo ". kuberim [system]"
-	echo ""
-	echo "This script will use kubectx and kubens to switch kubectl to use the target system."
-	echo "It also sets the TILLER_NAMESPACE environment variable for use with helm."
-	echo "Note: Script must be invoked using dot-space syntax to allow environment variable to be created in parent shell."
-	echo "e.g. . kuberim rim-dev"
-	echo "Available systems;"
-	for i in "${!context[@]}"
-	do
-		echo -e "\t$i"
-	done
-	
+
+region=""
+clustername=""
+profile=""
+namespace=""
+
+if [ "$#" -eq 0 ]
+then
+	usage
+# If there's no mode specified, default to contextswitch
+elif [ $1 != "ns" ] && [ $1 != "add" ] 
+then
+	mode="contextswitch"
+	contextswitch $1 $2
+
 else 
+# otherwise, check the args given
+	while :; do
+		case $1 in 
+		-h|-\?|--help)
+			usage
+			;;
+		add)
+			mode="add"
+			;;
+		ns)
+			mode="nsswitch"
+			if [ "$2" ]; then
+				namespace=$2
+				shift
+			else
+				echo 'Error: $0 ns must be followed by the name of the target namespace'
+				die 'Error: $0 ns must be followed by the name of the target namespace'
+			fi
+			;;
+		--region)
+			if [ "$2" ]; then
+				region=$2
+				shift
+			else
+				die 'Error: "--region" expects a non-empty argument'
+			fi
+			;;
+		--name)
+			if [ "$2" ]; then
+				clustername=$2
+				shift
+			else
+				die 'Error: "--clustername" expects a non-empty argument'
+			fi
+			;;
+		--profile)
+			if [ "$2" ]; then
+				profile=$2
+				shift
+			else
+				die 'Error: "--profile" is empty, omit argument to use default profile or specify an AWS profile name'
+			fi
+			;;
+		-?*)
+			printf 'WARNING: Unknown option (ignored): $s\n' "$1" >&2
+			;;
+
+		*)
+			break
+		esac
+		shift
+	done
+
+	# just one mode for now, there might be more later
+	# call the add config function to add the cluster to kubeconfigdir using aws eks
+	if [ $mode = "add" ] 
+	then
+		addconfig $region $clustername $profile 
+	elif [  $mode = "nsswitch" ]
+	then
+		nsswitch $namespace
+	fi
+fi
 
 
-	if [ -z ${context[$target]} ]; then
-		echo "Could not find kube context for $target"
-	elif [ -z $namespace[$target]} ]; then
-		echo "Could not find namespace for $target"
-	else 
-		echo "Switching context and namespace to $target"
-		kubectx ${context[$target]}
-		kubens ${namespace[$target]}
-		export TILLER_NAMESPACE=${namespace[$target]}
+
+}
+
+# Find the correct context file in KUBECONFIGDIR and switch into it using kubectx/kubens 
+function contextswitch() {
+
+	target=$1
+	namespace=$2
+
+	# if no namespace is specified, use the target name (e.g. rim-dev, rim-test etc..)
+	if [ -z $namespace ]
+	then
+		namespace=$target
+	fi
+	echo "Switching into $target"
+	if [ -z $target ]; then
+		echo "Error No target system specified."
+		usage
+		exit 1	
+	else
+		# check if there is more than one context matching the give name 
+		contextcount=`eval ls -1 "$KUBECONFIGDIR/${target}*" | wc -l`
+		if [ $contextcount -gt 1 ]
+		then
+			echo "Found $contextcount possible matches, please specify which target you want:"
+			echo `eval ls -1 "$KUBECONFIGDIR/${target}*"`
+		elif [ $contextcount -eq 1 ]
+		then
+			# if we've just the one, get the file, parse the yaml and read the context name
+			contextpath=`eval ls -1 "$KUBECONFIGDIR/${target}*" | tail -1`
+			contextfile=`eval basename ${contextpath}`
+
+			eval $(parse_yaml $contextpath "KUBERIM_CONF_")
+			contextname=$KUBERIM_CONF_contexts_name
+			
+			
+			echo "Switching context to $target and namespace to $namespace"
+			kubectx $contextname
+			kubens $namespace
+			export TILLER_NAMESPACE=$namespace
+			
+		else 
+			echo "Error: Unable to find kubeconfig file for $target in $KUBECONFIGDIR"; 
+		
+		fi
+
 	fi
 
-fi
+}
+
+# Switch into the given namespace
+function nsswitch(){
+	namespace=$1
+
+	kubens $namespace
+	export TILLER_NAMESPACE=$namespace
+}	
+
+
+function usage() {
+
+	echo "Usage:"
+	echo "Simplest usage, to switch context into a given cluster;"
+	echo -e "\t. kuberim [system] [namespace]"
+	echo -e "\tThis will search for kubeconfig files matching the given system name and"
+	echo -e "\tthen will use kubectx and kubens to switch kubectl to use the target system."
+	echo =e "\tIf namespace is specified, will also switch into the given namespace, otherwise will assume system name is the same as namespace"
+	echo -e "\tIt also sets the TILLER_NAMESPACE environment variable for use with helm."
+	echo -e "\tNote: Script must be invoked using dot-space syntax to allow environment variable to be created in parent shell."
+	echo -e "\te.g. . kuberim rim-dev"
+	echo -e "\tAvailable kubeconfigs in $KUBECONFIGDIR;"
+	for i in $(ls -1 $KUBECONFIGDIR/*)
+	do
+		name=`eval basename $i`
+		echo -e "\t\t$name"
+	done
+	echo "Other usage:"
+	echo -e "\t. kuberim add --region [aws-region] --name [cluster-name] [--profile [aws profile]]"
+	echo -e "\t This will call the aws eks command to add the given cluster to your KUBECONFIGDIR for use with this tool."
+	echo =e "\t --region - The AWS Region in which the cluster is located e.g. eu-west-1"
+	echo -e "\t --name - The name of the cluster you are trying to add  e.g. edw-uat-euw1"
+	echo -e "\t --profile - [Optional] If you have multiple AWS profiles configured, specify which one to use"
+	echo -e "\t Note: This usage requires the AWS CLI to be installed and configured with your credentials"
+	echo -e "\t See https://knowledge.retailinmotion.com/display/DEVOPS/AWS+EKS+Access for setup instructions"
+
+	echo -e "\n\t. kuberim ns [target namespace]"
+	echo -e "\tSwitches into the target namespace on the current cluster"
+	echo -e "\tUses kubens to set the kubernetes namespace and also sets TILLER_NAMESPACE environment variable"
+
+	echo "Prerequisites:"
+	echo "- aws cli - You must have the aws cli installed, configured and available on PATH"
+	echo "- kubectx/kubens must be installed and available on PATH"
+}
+
+# Given a region and cluster name, use aws eks cli to add config file
+function addconfig {
+
+	region=$1
+	name=$2
+	profile=$3
+
+	
+	argsOK=true
+	echo "name is '$name'"
+	if [ -z $region ] ; then argsOK=false; echo "Please specify region to add cluster."; usage; fi
+	if [ -z $name ] ; then argsOK=false; echo "Please specify name of cluster to add."; usage; fi
+	if [ -z $profile ] ; then profile="default"; fi
+
+	if [ argsOK ]
+	then 
+		echo "Going to add $name cluster in $region using $profile"
+
+		aws eks --region $region update-kubeconfig --name $name --kubeconfig $KUBECONFIGDIR/$name --profile $profile
+		echo "Reloading bashrc to regenerate kubeconfig variable"
+		source ~/.bashrc
+	fi
+
+
+}
+# Bash only yaml parsing function
+# Taken from https://stackoverflow.com/a/21189044/8318238
+function parse_yaml {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\):|\1|" \
+        -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+main "$@"
