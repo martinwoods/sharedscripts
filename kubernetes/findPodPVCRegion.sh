@@ -4,6 +4,7 @@
 # and for each claim, check what AWS zone it requires and what are the eligible nodes where it could be scheduled
 # Useful for identifying which nodes may need to have some resources freed if a pod is stuck in pending state due to a volume claim in the required zone
 
+
 if [ "$#" -ne 1 ]
 then
 	echo "Error: Must specify pod name and volume name"
@@ -14,8 +15,11 @@ else
 
 	echo "Getting AWS Region for volumes attached to $podName"
 
+	# Get a list of claims attached to this pod
 	claims=$(kubectl get pods $podName -o jsonpath="{.spec.volumes[*].persistentVolumeClaim.claimName}")
 	count=0
+	# check each claim to find the volume bound to it and the associated zone/region
+	# There is most likely only one claim, but there can be multiple
 	for claimName in $claims
 	do
 		((count=$count+1))
@@ -29,6 +33,8 @@ else
 		echo -e "\tPod $podName has PVC in $region region, $zone zone"
 
 		
+		# Once we know the zone, check what nodes are in this zone and output the list of pods on that node
+		# These pods can then be considered for eviction (manually) to make space for the pod which requires the PVC
 		echo -e "\r\n\t===== Eligible nodes and pods running on them ====="
 		for node in $(kubectl get nodes -l failure-domain.beta.kubernetes.io/zone=$zone --no-headers -o custom-columns=name:{.metadata.name})
 		do 
@@ -41,7 +47,8 @@ else
 			echo -e "\tTotal Pods: \t$podCount\r\n"
 		done
 	done
-
+	
+	# If we didn't find anything, let the user know
 	if [ $count -eq 0 ] 
 	then 
 		echo "Unable to find any persistentVolumeClaim attached to $podName"
