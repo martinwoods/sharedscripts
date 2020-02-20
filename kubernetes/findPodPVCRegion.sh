@@ -41,8 +41,10 @@ else
 			podsRaw=$(kubectl get pods -ocustom-columns='Pod Name':{.metadata.name} --no-headers --all-namespaces --field-selector spec.nodeName=${node}) 
 			pods=$(echo -e "$podsRaw" | awk -vORS=, '{print " " $1 }') 
 			podCount=$(echo -e "$podsRaw" | wc -l)
+			lifeCycle=$(kubectl get nodes $node -o jsonpath="{.metadata.labels.lifecycle}")
 
 			echo -e "\tNode: \t$node"
+			echo -e "\tLife-Cycle: \t$lifeCycle"
 			echo -e "\tPods: \t$pods"
 			echo -e "\tTotal Pods: \t$podCount\r\n"
 		done
