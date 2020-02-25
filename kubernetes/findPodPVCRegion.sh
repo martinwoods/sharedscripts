@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 # Given the name of a kubernetes pod, find any attached persistent volume claims
 # and for each claim, check what AWS zone it requires and what are the eligible nodes where it could be scheduled
 # Useful for identifying which nodes may need to have some resources freed if a pod is stuck in pending state due to a volume claim in the required zone
