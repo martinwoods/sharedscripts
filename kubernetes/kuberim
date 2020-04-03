@@ -137,10 +137,14 @@ function contextswitch() {
 			eval $(parse_yaml $contextpath "KUBERIM_CONF_")
 			contextname=$KUBERIM_CONF_contexts_name
 			
-			
-			echo "Switching context to $target and namespace to $namespace"
-			kubectx $contextname
-			kubens $namespace
+			if [ `which kubie` ]; then 
+				echo "Switching context to $target and namespace to $namespace using kubie"
+				kubie ctx $contextname -n $namespace
+			else
+				echo "Switching context to $target and namespace to $namespace using kubectx"
+				kubectx $contextname
+				kubens $namespace
+			fi
 			export TILLER_NAMESPACE=$namespace
 			
 		else 
