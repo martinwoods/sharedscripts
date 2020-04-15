@@ -7,6 +7,10 @@
 # Keith Douglas
 # 02 May 2019
 #
+# store a copy of the original terminal PS1 variable for reference
+if [[ -z $ORIGINAL_PS1 ]]; then
+	export ORIGINAL_PS1=$PS1
+fi
 main() {
 
 # Check that we know where to get the kubeconfig from (and to store new ones in)
@@ -111,6 +115,7 @@ function contextswitch() {
 	target=$1
 	namespace=$2
 
+
 	# if no namespace is specified, use the target name (e.g. rim-dev, rim-test etc..)
 	if [ -z $namespace ]
 	then
@@ -137,16 +142,13 @@ function contextswitch() {
 			eval $(parse_yaml $contextpath "KUBERIM_CONF_")
 			contextname=$KUBERIM_CONF_contexts_name
 			
-			if [ `which kubie` ]; then 
-				echo "Switching context to $target and namespace to $namespace using kubie"
-				kubie ctx $contextname -n $namespace
-			else
-				echo "Switching context to $target and namespace to $namespace using kubectx"
-				kubectx $contextname
-				kubens $namespace
-			fi
-			export TILLER_NAMESPACE=$namespace
 			
+			echo "Switching context to $target and namespace to $namespace using kubectx"
+			kubectx $contextname
+			kubens $namespace
+			
+			export TILLER_NAMESPACE=$namespace
+			export PS1="\[\e[31m\]${target}\[\e[0m\]|\[\e[32m\]${namespace}\[\e[0m\]] $ORIGINAL_PS1"
 		else 
 			echo "Error: Unable to find kubeconfig file for $target in $KUBECONFIGDIR"; 
 		
@@ -162,6 +164,7 @@ function nsswitch(){
 
 	kubens $namespace
 	export TILLER_NAMESPACE=$namespace
+	export PS1="\[\e[31m\]${target}\[\e[0m\]|\[\e[32m\]${namespace}\[\e[0m\]] $ORIGINAL_PS1"
 }	
 
 
