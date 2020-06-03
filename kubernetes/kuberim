@@ -140,7 +140,11 @@ function contextswitch() {
 			contextfile=`eval basename ${contextpath}`
 
 			eval $(parse_yaml $contextpath "KUBERIM_CONF_")
-			contextname=$KUBERIM_CONF_contexts_name
+			if [ ! -z $KUBERIM_CONF_contexts__name ]; then  
+				contextname=$KUBERIM_CONF_contexts__name; 
+			else 
+				contextname=$KUBERIM_CONF_contexts_name; 
+			fi
 			
 			
 			echo "Switching context to $target and namespace to $namespace using kubectx"
