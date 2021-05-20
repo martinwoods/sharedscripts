@@ -80,7 +80,7 @@ BEGIN
 						@RoleId = NULL,
 						@LastModifiedUserId = 1,
 						@PasswordPolicyId = NULL,
-						@keepUsernameClear = 1),
+						@keepUsernameClear = 1,
 						@BlockvPOSSales = 0'
 			PRINT 'Creating admin role ' + @newAdminEmail + ' for company ' + replace(@crtCompanyName,'''','') + '-' + (CAST(@crtCompanyId as VARCHAR(10))) + '---'
 			EXEC (@userInsertProc)
