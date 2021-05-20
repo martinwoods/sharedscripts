@@ -17,14 +17,8 @@ DECLARE @commit BIT
 DECLARE @dynSQL VARCHAR(MAX)
 DECLARE @userInsertProc VARCHAR(MAX) = ''
 DECLARE @userUpdateProc VARCHAR(MAX) = ''
-DECLARE @crtException VARCHAR(50)
-DECLARE @crtExceptionDefault VARCHAR(50)
-DECLARE @crtExceptionType VARCHAR(50)
-DECLARE @exceptionsInsert VARCHAR(MAX) = ''
-DECLARE @exceptionsUpdate VARCHAR(MAX) = ''
 DECLARE @crtAccessColumn VARCHAR(50)
 DECLARE @accessColumns VARCHAR(MAX) = ''
-DECLARE @useAppCompany BIT = 1
 DECLARE @newAdminEmail VARCHAR(MAX) = ''
 DECLARE @warehouseIdList VARCHAR(MAX) = ''
 
@@ -33,108 +27,18 @@ DECLARE @warehouseIdList VARCHAR(MAX) = ''
 
 DECLARE @copyUserEmail VARCHAR(50) = @crtUserEmail
 
---Add the known exceptions and values in a temp table and 
---check if they need to be added when calling the insert / update procs;
---This is compatibility mode for clients with older releases
-
-IF OBJECT_ID('tempdb..#CreateVectorAccountExceptions') IS NOT NULL  
-	DROP TABLE #CreateVectorAccountExceptions
-
-CREATE TABLE #CreateVectorAccountExceptions
-(
-	property VARCHAR(50),
-	defaultValue VARCHAR(50),
-	isString BIT
-)
---Compatibility exception
-INSERT INTO #CreateVectorAccountExceptions
-	(property, defaultValue, isString)
-VALUES
-	('PasswordPolicyId', 'NULL', 0),
-	('keepUsernameClear', '1', 0),
-	('BlockvPOSSales', '0', 0)
-
-DECLARE c_Exceptions CURSOR FOR
-	SELECT property, defaultValue, isString
-	FROM #CreateVectorAccountExceptions
-
-OPEN c_Exceptions
-FETCH NEXT FROM c_Exceptions INTO @crtException, @crtExceptionDefault, @crtExceptionType
-
-WHILE @@FETCH_STATUS = 0
-	BEGIN
-	--PRINT 'Current exception:' + @crtException + ' = ' + @crtExceptionDefault
-	IF EXISTS (
-		SELECT *
-		FROM sys.procedures pr
-		JOIN sys.parameters pa
-			ON pr.object_id = pa.object_id
-		WHERE 
-			pr.object_id = object_ID('dbo.appUserInsert')
-		AND pa.name = '@' + @crtException
-	)
-		BEGIN
-			IF @crtExceptionType = 1
-				SET @exceptionsInsert = @exceptionsInsert + ',@' + @crtException + ' = ''' + @crtExceptionDefault + ''''
-			ELSE
-				SET @exceptionsInsert = @exceptionsInsert + ',@' + @crtException + ' = ' + @crtExceptionDefault
-		END
-
-	IF EXISTS (
-		SELECT *
-		FROM sys.procedures pr
-		JOIN sys.parameters pa
-			ON pr.object_id = pa.object_id
-		WHERE 
-			pr.object_id = object_ID('dbo.appUserUpdate')
-		AND pa.name = '@' + @crtException
-	)
-		BEGIN
-			IF @crtExceptionType = 1
-				SET @exceptionsUpdate = @exceptionsUpdate + ',@' + @crtException + ' = ''' + @crtExceptionDefault + ''''
-			ELSE
-				SET @exceptionsUpdate = @exceptionsUpdate + ',@' + @crtException + ' = ' + @crtExceptionDefault
-		END
-
-	FETCH NEXT FROM c_Exceptions INTO @crtException, @crtExceptionDefault, @crtExceptionType
-	END
-CLOSE c_Exceptions
-DEALLOCATE c_Exceptions
-
-IF OBJECT_ID('tempdb..#CreateVectorAccountExceptions') IS NOT NULL  
-	DROP TABLE #CreateVectorAccountExceptions
-
---Get the IDs of companies with existing users if there's no isAirlineCompany flag set in app_Company
-IF NOT EXISTS (SELECT *
-				FROM dbo.app_Company
-				WHERE IsAirlineCompany = 1)
-	BEGIN
-		IF EXISTS (SELECT DISTINCT U.CompanyId 
-						FROM dbo.app_User AS U
-						JOIN dbo.app_Company AS C 
-							ON (U.CompanyId = C.CompanyId))
-			BEGIN
-				SET @useAppCompany = 0
-			END
-		ELSE
-			BEGIN
-				SET @msg = 'There is no suitable Airline company enabled in the database ' + DB_NAME() + ', cannot proceed.'
-				RAISERROR (@msg, 16, -1)
-				GOTO ABORT_NOW2
-			END
-	END
-
 IF @superAdmin = 1
 BEGIN
-	--Get the list of the available 'access'-like columns in App_User (plus a few bonus ones), as we'll need them to set the access flag
+	--Get the list of the available 'access'-like columns in App_User, as we'll need them to set the access flag
 	DECLARE c_accessColumns CURSOR FOR
 		SELECT COLUMN_NAME
 		FROM INFORMATION_SCHEMA.COLUMNS
 		WHERE TABLE_NAME = 'app_User' 
-			AND (COLUMN_NAME like '%access%'
-				OR COLUMN_NAME in ('CanEditRoles','OMSUserRoleId','OMSCanSeePrices','PreorderEnabled'))
+			AND COLUMN_NAME like '%access%'
+
 	OPEN c_accessColumns
 	FETCH NEXT FROM c_accessColumns INTO @crtAccessColumn
+
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		SET @accessColumns = @accessColumns + ', ' + @crtAccessColumn + ' = 1'
@@ -145,24 +49,21 @@ BEGIN
 END
 
 --Cycle through companies set in the DB and create a user for each one
---If no isAirlineCompany flag is set in app_Company, join on app_User to see which companies already have accounts
-IF @useAppCompany = 1
+IF NOT EXISTS (SELECT *
+				FROM dbo.app_Company
+				WHERE IsAirlineCompany = 1
+				AND IsActive = 1)
 	BEGIN
-		DECLARE c_company CURSOR FOR
-			SELECT CompanyId, Company, SiteId
-			FROM dbo.app_Company
-			WHERE IsAirlineCompany = 1
+		SET @msg = 'There is no suitable Airline company enabled in the database ' + DB_NAME() + ', cannot proceed.'
+		RAISERROR (@msg, 16, -1)
+		GOTO ABORT_NOW2
 	END
-ELSE
-	BEGIN
-		DECLARE c_company CURSOR FOR
-			SELECT CompanyId, Company, SiteId
-			FROM dbo.app_Company
-			WHERE CompanyId in (SELECT DISTINCT U.CompanyId 
-						FROM dbo.app_User AS U
-						JOIN dbo.app_Company AS C 
-							ON (U.CompanyId = C.CompanyId))
-	END
+
+DECLARE c_company CURSOR FOR
+	SELECT CompanyId, Company, SiteId
+	FROM dbo.app_Company
+	WHERE IsAirlineCompany = 1
+	AND IsActive = 1
 
 OPEN c_company
 FETCH NEXT FROM c_company INTO @crtCompanyId, @crtCompanyName, @crtCompanySiteId
@@ -188,9 +89,14 @@ BEGIN
 			--Ensure the admin role has the access columns flags set
 			PRINT 'Ensure access is properly set for the selected admin role'
 			SET @dynSQL = 'UPDATE dbo.app_User
-				SET IsSuperAdmin = 1--ACCESS_ADDONS
+				SET IsSuperAdmin = 1,
+				CanEditRoles = 1,
+				OMSUserRoleId = 1,
+				OMSCanSeePrices = 1,
+				PreorderEnabled = 1--ACCESS_ADDONS
 				WHERE UserId = ' + (CAST(@crtRoleId as VARCHAR(10)))
 			SET @dynSQL = REPLACE(@dynSQL,'--ACCESS_ADDONS',@accessColumns)
+			-- PRINT @dynSQL
 			EXEC (@dynSQL)
 
 			PRINT 'Current role id: ' + (CAST(@crtRoleId as VARCHAR(10)))
@@ -243,8 +149,10 @@ BEGIN
 				@IsRole = 0,
 				@CanEditRoles = 0,
 				@RoleId = ' + (CAST(@crtRoleId as VARCHAR(10))) + ',
-				@LastModifiedUserId = 1--EXCEPTIONS'
-			SET @userInsertProc = REPLACE(@userInsertProc,'--EXCEPTIONS',@exceptionsInsert)
+				@LastModifiedUserId = 1,
+				@PasswordPolicyId = NULL,
+				@keepUsernameClear = 1,
+				@BlockvPOSSales = 0'
 			PRINT 'Creating login ' + @crtUserEmail + ' for company ' + replace(@crtCompanyName,'''','') + '-' + (CAST(@crtCompanyId as VARCHAR(10))) + '---'
 			EXEC (@userInsertProc)
             SET @crtUserId = (SELECT 
@@ -256,17 +164,20 @@ BEGIN
 	ELSE
 		BEGIN
 			--Update existing user
-			SET @userUpdateProc = 'EXEC dbo.appUserUpdate @Email = ''' + @crtUserEmail + ''',
-							@UserId = ' + (CAST(@crtUserId as VARCHAR(10))) + ',
-							@DisplayName = ''' + @crtUserDisplayName + ''',
-							@CompanyId = ' + (CAST(@crtCompanyId as VARCHAR(10))) + ',
-                            @IsInactive = 0,
-							@IsRole = 0,
-							@CanEditRoles = 0,
-							@IsSuperAdmin = ' + (CAST(@superAdmin as VARCHAR(10))) + ',
-							@RoleId = ' + (CAST(@crtRoleId as VARCHAR(10))) + ',
-							@LastModifiedUserId = 1--EXCEPTIONS'
-			SET @userUpdateProc = REPLACE(@userUpdateProc,'--EXCEPTIONS',@exceptionsUpdate)
+			SET @userUpdateProc = 'EXEC dbo.appUserUpdate
+				@Email = ''' + @crtUserEmail + ''',
+				@UserId = ' + (CAST(@crtUserId as VARCHAR(10))) + ',
+				@DisplayName = ''' + @crtUserDisplayName + ''',
+				@CompanyId = ' + (CAST(@crtCompanyId as VARCHAR(10))) + ',
+                @IsInactive = 0,
+				@IsRole = 0,
+				@CanEditRoles = 0,
+				@IsSuperAdmin = ' + (CAST(@superAdmin as VARCHAR(10))) + ',
+				@RoleId = ' + (CAST(@crtRoleId as VARCHAR(10))) + ',
+				@LastModifiedUserId = 1,
+				@PasswordPolicyId = NULL,
+				@keepUsernameClear = 1,
+				@BlockvPOSSales = 0'
 			PRINT 'Updating login ' + @crtUserEmail + ' for company ' + replace(@crtCompanyName,'''','') + '-' + (CAST(@crtCompanyId as VARCHAR(10))) + '---'
 			EXEC (@userUpdateProc)
 			--Reset user password
@@ -290,17 +201,11 @@ BEGIN
 					@PasswordHash = @crtUserPassword
 				END
 		END
-    IF EXISTS (SELECT 1 
-				FROM sysobjects so 
-				INNER JOIN syscolumns sc ON sc.id=so.id
-				WHERE so.name = 'app_User' 
-					AND sc.name = 'ForcePasswordChange')
-        BEGIN
-		SET @dynSQL = 'UPDATE dbo.app_User
-			SET ForcePasswordChange = 1
-            WHERE Email = ''' + @crtUserEmail + ''''
-		EXEC (@dynSQL)
-        END
+	-- Force password change on next login
+	UPDATE dbo.app_User
+		SET ForcePasswordChange = 1
+        WHERE Email = @crtUserEmail
+
 	-- Make sure the user is Active
     IF EXISTS (SELECT 1 
 				FROM sysobjects so 
@@ -344,7 +249,11 @@ BEGIN
 		BEGIN
 			PRINT 'Ensure access is properly set for the user with admin role'
 			SET @dynSQL = 'UPDATE dbo.app_User
-				SET IsSuperAdmin = 1--ACCESS_ADDONS
+				SET IsSuperAdmin = 1,
+				CanEditRoles = 1,
+				OMSUserRoleId = 1,
+				OMSCanSeePrices = 1,
+				PreorderEnabled = 1--ACCESS_ADDONS
 				WHERE UserId = ' + (CAST(@crtUserId as VARCHAR(10)))
 			SET @dynSQL = REPLACE(@dynSQL,'--ACCESS_ADDONS',@accessColumns)
 			EXEC (@dynSQL)
