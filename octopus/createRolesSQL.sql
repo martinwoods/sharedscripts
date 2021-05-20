@@ -12,111 +12,32 @@ DECLARE @crtCompanyId INT
 DECLARE @crtRoleId INT
 DECLARE @counter INT = 0
 DECLARE @commit BIT
-DECLARE @useAppCompany BIT = 1
 DECLARE @msg VARCHAR(MAX) = ''
 DECLARE @newAdminEmail VARCHAR(MAX) = ''
 DECLARE @crtCompanyName VARCHAR(50)
 DECLARE @crtCompanySiteId INT
-DECLARE @exceptionsInsert VARCHAR(MAX) = ''
 DECLARE @userInsertProc VARCHAR(MAX) = ''
-DECLARE @crtException VARCHAR(50)
-DECLARE @crtExceptionDefault VARCHAR(50)
-DECLARE @crtExceptionType VARCHAR(50)
-
 
 --REPLACE_WITH_VARIABLES
 
 
-IF OBJECT_ID('tempdb..#CreateVectorAccountExceptions') IS NOT NULL  
-	DROP TABLE #CreateVectorAccountExceptions
-
-CREATE TABLE #CreateVectorAccountExceptions
-(
-	property VARCHAR(50),
-	defaultValue VARCHAR(50),
-	isString BIT
-)
---Compatibility exception
-INSERT INTO #CreateVectorAccountExceptions
-	(property, defaultValue, isString)
-VALUES
-	('PasswordPolicyId', 'NULL', 0),
-	('keepUsernameClear', '1', 0),
-	('BlockvPOSSales', '0', 0)
-
-DECLARE c_Exceptions CURSOR FOR
-	SELECT property, defaultValue, isString
-	FROM #CreateVectorAccountExceptions
-
-OPEN c_Exceptions
-FETCH NEXT FROM c_Exceptions INTO @crtException, @crtExceptionDefault, @crtExceptionType
-
-WHILE @@FETCH_STATUS = 0
-	BEGIN
-	--PRINT 'Current exception:' + @crtException + ' = ' + @crtExceptionDefault
-	IF EXISTS (
-		SELECT *
-		FROM sys.procedures pr
-		JOIN sys.parameters pa
-			ON pr.object_id = pa.object_id
-		WHERE 
-			pr.object_id = object_ID('dbo.appUserInsert')
-		AND pa.name = '@' + @crtException
-	)
-		BEGIN
-			IF @crtExceptionType = 1
-				SET @exceptionsInsert = @exceptionsInsert + ',@' + @crtException + ' = ''' + @crtExceptionDefault + ''''
-			ELSE
-				SET @exceptionsInsert = @exceptionsInsert + ',@' + @crtException + ' = ' + @crtExceptionDefault
-		END
-
-	FETCH NEXT FROM c_Exceptions INTO @crtException, @crtExceptionDefault, @crtExceptionType
-	END
-CLOSE c_Exceptions
-DEALLOCATE c_Exceptions
-
-IF OBJECT_ID('tempdb..#CreateVectorAccountExceptions') IS NOT NULL  
-	DROP TABLE #CreateVectorAccountExceptions
-
-
---Check if role creation is needed
---Join on app_user for existing users if there is no company with IsAirlineCompany set
+-- Check if there's an active airline company in the system
 IF NOT EXISTS (SELECT *
 				FROM dbo.app_Company
-				WHERE IsAirlineCompany = 1)
+				WHERE IsAirlineCompany = 1
+				AND IsActive = 1)
 	BEGIN
-		IF EXISTS (SELECT DISTINCT U.CompanyId 
-						FROM dbo.app_User AS U
-						JOIN dbo.app_Company AS C 
-							ON (U.CompanyId = C.CompanyId))
-			BEGIN
-				SET @useAppCompany = 0
-			END
-		ELSE
-			BEGIN
-				SET @msg = 'There is no suitable Airline company enabled in the database ' + DB_NAME() + ', cannot proceed.'
-				RAISERROR (@msg, 16, -1)
-				GOTO ALL_DONE
-			END
+		SET @msg = 'There is no suitable Airline company enabled in the database ' + DB_NAME() + ', cannot proceed.'
+		RAISERROR (@msg, 16, -1)
+		GOTO ALL_DONE
 	END
 
-IF @useAppCompany = 1
-	BEGIN
-		DECLARE c_company CURSOR FOR
-			SELECT CompanyId, Company, SiteId
-			FROM dbo.app_Company
-			WHERE IsAirlineCompany = 1
-	END
-ELSE
-	BEGIN
-		DECLARE c_company CURSOR FOR
-			SELECT CompanyId, Company, SiteId
-			FROM dbo.app_Company
-			WHERE CompanyId in (SELECT DISTINCT U.CompanyId 
-						FROM dbo.app_User AS U
-						JOIN dbo.app_Company AS C 
-							ON (U.CompanyId = C.CompanyId))
-	END
+-- Cycle through active airlines and check if user creation is needed
+DECLARE c_company CURSOR FOR
+	SELECT CompanyId, Company, SiteId
+	FROM dbo.app_Company
+	WHERE IsAirlineCompany = 1
+	AND IsActive = 1
 
 OPEN c_company
 FETCH NEXT FROM c_company INTO @crtCompanyId, @crtCompanyName, @crtCompanySiteId
@@ -157,8 +78,10 @@ BEGIN
 						@IsRole = 1,
 						@CanEditRoles = 1,
 						@RoleId = NULL,
-						@LastModifiedUserId = 1--EXCEPTIONS'
-			SET @userInsertProc = REPLACE(@userInsertProc,'--EXCEPTIONS',@exceptionsInsert)
+						@LastModifiedUserId = 1,
+						@PasswordPolicyId = NULL,
+						@keepUsernameClear = 1),
+						@BlockvPOSSales = 0'
 			PRINT 'Creating admin role ' + @newAdminEmail + ' for company ' + replace(@crtCompanyName,'''','') + '-' + (CAST(@crtCompanyId as VARCHAR(10))) + '---'
 			EXEC (@userInsertProc)
 
@@ -238,24 +161,11 @@ and name <>'EPOSActive'
 Set @app_user_column_list = Left(@app_user_column_list,Len(@app_user_column_list)-1)
 
 --Declare cursor for airline companies for the environment
-
-IF @useAppCompany = 1
-	BEGIN
-		DECLARE db_cursor CURSOR FOR
-			SELECT CompanyId
-			FROM dbo.app_Company
-			WHERE IsAirlineCompany = 1
-	END
-ELSE
-	BEGIN
-		DECLARE db_cursor CURSOR FOR
-			SELECT CompanyId
-			FROM dbo.app_Company
-			WHERE CompanyId in (SELECT DISTINCT U.CompanyId 
-						FROM dbo.app_User AS U
-						JOIN dbo.app_Company AS C 
-							ON (U.CompanyId = C.CompanyId))
-	END
+DECLARE db_cursor CURSOR FOR
+	SELECT CompanyId
+	FROM dbo.app_Company
+	WHERE IsAirlineCompany = 1
+	AND IsActive = 1
 
 OPEN db_cursor  
 FETCH NEXT FROM db_cursor INTO @crtCompanyId
