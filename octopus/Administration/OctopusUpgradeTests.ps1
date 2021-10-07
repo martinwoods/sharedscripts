@@ -25,21 +25,17 @@ foreach ($instance in $octopusInstanceList)
         Write-Host "Processing $($instance.url) ..."
 
         $space = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/spaces/all") -Headers $header) | Where-Object {$_.Name -eq $instance.space}
-        $projectGroup = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projectgroups/all") -Headers $header) | Where-Object {$_.SpaceId -eq $space.Id}
-        foreach ($projectGroupItem in $projectGroup)
+        $projects = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projects/all") -Headers $header) | Where-Object {$_.SpaceId -eq $space.Id}
+        foreach ($projectItem in $projects)
         {
-            $projects = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projects/all") -Headers $header) | Where-Object {$_.ProjectGroupId -eq $projectGroupItem.Id} 
-            foreach ($projectItem in $projects)
-            {
-                $releases = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projects/" + $projectItem.Id  + "/releases") -Headers $header) 
-                [void]$projectList.Add(@{"ProjectName"=$projectItem.Name;"ProjectId"=$projectItem.Id;"ReleaseCount"=$releases.Items.Count;"LatestRelease"=$releases.Items[0].Version;})
-            }
+            $releases = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projects/" + $projectItem.Id  + "/releases") -Headers $header) 
+            [void]$projectList.Add(@{"ProjectName"=$projectItem.Name;"ProjectId"=$projectItem.Id;"ReleaseItemCount"=$releases.Items.Count;"LatestReleaseVersion"=$releases.Items[0].Version;})
         }
-        
+
         $projectData = @{"Projects"=$projectList;}
         $outputJSON.Add($instance.name,$projectData)
         $outputJSONfilenameDate = Get-Date -format 'yyyyMMdd_HHmm'
-        Write-Host "Generating OctopusInstanceData-$($instance.name)-$($outputJSONfilenameDate).json"
+        Write-Host "Generating OctopusInstanceData-$($instance.name)-$($outputJSONfilenameDate).json`n"
         $outputJSON | ConvertTo-Json -Depth 5 | Out-File ".\OctopusInstanceData-$($instance.name)-$($outputJSONfilenameDate).json"
     }
     catch
