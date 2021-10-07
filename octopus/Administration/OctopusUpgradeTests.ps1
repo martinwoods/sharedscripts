@@ -7,36 +7,39 @@
 class OctopusInstance {
     [string]$name
     [string]$url
-    [string]$space
+    [string]$spaces
     [string]$apiKey
 }
 $octopusInstanceList = @(
-    [OctopusInstance]@{name="Live";url="http://octopus.rim.local";space="Default";apiKey="<API_KEY>"}
-    [OctopusInstance]@{name="Sandbox";url="http://octopus-sandbox.rim.local";space="Default";apiKey="<API_KEY>"}
+    [OctopusInstance]@{name="Live";url="http://octopus.rim.local";spaces="Default,vPay";apiKey="<API_KEY>"}
+    [OctopusInstance]@{name="Sandbox";url="http://octopus-sandbox.rim.local";spaces="Default,vPay";apiKey="<API_KEY>"}
 )
 
 foreach ($instance in $octopusInstanceList)
 {
-    $outputJSON = @{}
-    $projectList = New-Object System.Collections.ArrayList
     try
     {
         $header = @{ "X-Octopus-ApiKey" = $instance.apiKey }
-        Write-Host "Processing $($instance.url) ..."
-
-        $space = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/spaces/all") -Headers $header) | Where-Object {$_.Name -eq $instance.space}
-        $projects = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projects/all") -Headers $header) | Where-Object {$_.SpaceId -eq $space.Id}
-        foreach ($projectItem in $projects)
+        $spaces = $instance.spaces.Split(",")
+        foreach ($spaceItem in $spaces)
         {
-            $releases = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/projects/" + $projectItem.Id  + "/releases") -Headers $header) 
-            [void]$projectList.Add(@{"ProjectName"=$projectItem.Name;"ProjectId"=$projectItem.Id;"ReleaseItemCount"=$releases.Items.Count;"LatestReleaseVersion"=$releases.Items[0].Version;})
+            Write-Host "Processing '$($instance.url)' '$spaceItem' space ..."
+            $outputJSON = @{}
+            $projectList = New-Object System.Collections.ArrayList
+            $space = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/spaces/all") -Headers $header) | Where-Object {$_.Name -eq $spaceItem}
+            $projects = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/" + $space.Id + "/projects/all") -Headers $header) 
+            foreach ($projectItem in $projects)
+            {
+                $releases = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/" + $space.Id + "/projects/" + $projectItem.Id  + "/releases") -Headers $header) 
+                [void]$projectList.Add(@{"ProjectName"=$projectItem.Name;"ProjectId"=$projectItem.Id;"ReleaseItemCount"=$releases.Items.Count;"LatestReleaseVersion"=$releases.Items[0].Version;})
+            }
+    
+            $projectData = @{$spaceItem=$projectList;}
+            $outputJSON.Add($instance.name,$projectData)
+            $outputJSONfilenameDate = Get-Date -format 'yyyyMMdd_HHmm'
+            Write-Host "Generating OctopusInstanceData-$($instance.name)-$($spaceItem)-$($outputJSONfilenameDate).json`n"
+            $outputJSON | ConvertTo-Json -Depth 5 | Out-File ".\OctopusInstanceData-$($instance.name)-$($spaceItem)-$($outputJSONfilenameDate).json"
         }
-
-        $projectData = @{"Projects"=$projectList;}
-        $outputJSON.Add($instance.name,$projectData)
-        $outputJSONfilenameDate = Get-Date -format 'yyyyMMdd_HHmm'
-        Write-Host "Generating OctopusInstanceData-$($instance.name)-$($outputJSONfilenameDate).json`n"
-        $outputJSON | ConvertTo-Json -Depth 5 | Out-File ".\OctopusInstanceData-$($instance.name)-$($outputJSONfilenameDate).json"
     }
     catch
     {
