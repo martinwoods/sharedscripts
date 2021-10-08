@@ -23,7 +23,7 @@ foreach ($instance in $octopusInstanceList)
         $spaces = $instance.spaces.Split(",")
         foreach ($spaceItem in $spaces)
         {
-            Write-Host "Processing '$($instance.url)' '$spaceItem' space ..."
+            Write-Host "[$($instance.url)] Processing '$spaceItem' space ..."
             $outputJSON = @{}
             $projectList = New-Object System.Collections.ArrayList
             $space = (Invoke-RestMethod -Method Get -Uri ($instance.url + "/api/spaces/all") -Headers $header) | Where-Object {$_.Name -eq $spaceItem}
@@ -37,7 +37,7 @@ foreach ($instance in $octopusInstanceList)
             $projectData = @{$spaceItem=$projectList;}
             $outputJSON.Add($instance.name,$projectData)
             $outputJSONfilenameDate = Get-Date -format 'yyyyMMdd_HHmm'
-            Write-Host "Generating OctopusInstanceData-$($instance.name)-$($spaceItem)-$($outputJSONfilenameDate).json`n"
+            Write-Host "[$($instance.url)] Generating 'OctopusInstanceData-$($instance.name)-$($spaceItem)-$($outputJSONfilenameDate).json'`n"
             $outputJSON | ConvertTo-Json -Depth 5 | Out-File ".\OctopusInstanceData-$($instance.name)-$($spaceItem)-$($outputJSONfilenameDate).json"
         }
     }
