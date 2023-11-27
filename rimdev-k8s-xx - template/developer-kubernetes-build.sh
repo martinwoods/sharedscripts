@@ -49,7 +49,7 @@
 # SOR#20230117
 # version 6.4   - Set Elasticsearch to  7.17.3 (it was previously pulling 'v6.8.23')
 
-#SR#20230719
+# SR#20230719
 # version 6.5 - Set kubernetes dashboard to 6.0.8 SR 18626
 
 # AM#20231018
@@ -108,13 +108,13 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 ############################################################
 # Install helm v3.x
 ############################################################
-echo -e "${GREEN}Install helm (v3.5.2)${NC}"
+echo -e "${GREEN}Install helm (v3.13.2)${NC}"
 echo "Downloading helm package..."
 cd /root
-wget https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz
+wget https://get.helm.sh/helm-v3.13.2-linux-amd64.tar.gz
 
 echo "Extracting helm package..."
-tar -zxvf helm-v3.5.2-linux-amd64.tar.gz
+tar -zxvf helm-v3.13.2-linux-amd64.tar.gz
 mv linux-amd64/helm /usr/local/bin/helm
 PATH=$PATH:/usr/local/bin
 
@@ -132,25 +132,68 @@ helm repo update
 echo "Creating ambassador namespace..."
 kubectl create namespace ambassador
 
-echo "Installing Ambassador chart..."
-helm install ambassador --namespace ambassador datawire/ambassador --set replicaCount=1
+echo "Creating CRDs"
+kubectl apply -f https://app.getambassador.io/yaml/edge-stack/2.5.1/aes-crds.yaml
+
+echo "Creating ambassador values yaml"
+echo '
+emissary-ingress:
+  createDefaultListeners: true
+  agent:
+    enabled: false
+  env:
+    AES_ACME_LEADER_DISABLE: true
+rateLimit:
+  create: false
+authService:
+  create: false
+' > ambassador.values.yaml
+echo "Creating vector-dev.com values yaml"
+echo '
+apiVersion: getambassador.io/v2
+kind: Host
+metadata:
+  name: vector-dev-host
+  namespace: ambassador
+spec:
+  acmeProvider:
+    authority: none
+  ambassadorId:
+  - default
+  hostname: vector-dev.com
+  requestPolicy:
+    insecure:
+      action: Route
+  selector:
+    matchLabels:
+      hostname: vector-dev.com
+  tlsSecret: {}
+status:
+  state: Ready
+  tlsCertificateSource: None
+' > vector-dev.com.values.yaml
 
 echo "Creating Host CRD for host name vector-dev.com...."
-kubectl apply -f http://bitbucket.retailinmotion.com/projects/BC/repos/manifests/raw/ambassador/host-vector-dev.yaml?at=refs%2Fheads%2Fmaster -n ambassador
+kubectl apply -f vector-dev.com.values.yaml -n ambassador
+
+echo "Installing Ambassador chart..."
+helm install -n ambassador --set replicaCount=1 edge-stack datawire/edge-stack -f ambassador.values.yaml --version 7.6.1
+
 
 ############################################################
 # Install Nginx Ingress
 ############################################################
-echo -e "${GREEN}Installing Nginx Ingress${NC}"
-echo "Adding Nexus repo to Helm..."
-helm repo add nexus https://nexus.retailinmotion.com/repository/helm-hosted/
+echo -e "${GREEN}Installing Ingress-Ingress${NC}"
+echo "Adding ingress-nginx repo to Helm..."
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
 echo "Creating nginx-ingress namespace..."
 kubectl create namespace nginx-ingress
 
 echo "Installing Nginx Ingress chart..."
-helm upgrade --install --namespace nginx-ingress nginx-ingress nexus/nginx-ingress --set tcp.6379=infrastructure/redis-master:6379,tcp.27017=infrastructure/mongodb:27017,tcp.9200=infrastructure/elasticsearch-master:9200,controller.hostNetwork=true,defaultBackend.enabled=false,controller.defaultBackendService=ambassador/ambassador --version 1.41.3
+helm upgrade --install --namespace nginx-ingress nginx-ingress ingress-nginx/ingress-nginx --set tcp.6379=infrastructure/redis-master:6379,tcp.27017=infrastructure/mongodb:27017,tcp.9200=infrastructure/elasticsearch-master:9200,controller.hostNetwork=true,controller.watchIngressWithoutClass=true,controller.extraArgs.default-backend-service=ambassador/edge-stack --version 4.2.5
+
 
 ############################################################
 # Install hostpath storage
@@ -178,7 +221,7 @@ echo "Creating kubernetes-dashboard namespace..."
 kubectl create ns kubernetes-dashboard
 
 echo "Installing kubernetes-dashboard chart..."
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard -n kubernetes-dashboard --version 6.0.8 --set image.repository=nexus.retailinmotion.com:5000/kubernetesui/dashboard --set protocolHttp=true --set rbac.create=true --set serviceAccount.create=true --set service.type=NodePort --set service.nodePort=30080
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard -n kubernetes-dashboard --set image.repository=nexus.retailinmotion.com:5000/kubernetesui/dashboard --set protocolHttp=true --set rbac.create=true --set serviceAccount.create=true --set service.type=NodePort --set service.nodePort=30080
 
 echo "Creating kubernetes-dashboard roles, bindings, etc..."
 kubectl -n kubernetes-dashboard create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kubernetes-dashboard:kubernetes-dashboard
@@ -245,9 +288,21 @@ helm install kafka -n infrastructure incubator/kafka --set external.enabled=true
 echo -e "${GREEN}Waiting 180 seconds for Kafka to load...${NC}"
 sleep 180
 
+echo -e "${GREEN}Installing Nexus repo...${NC}"
+helm repo add nexus https://nexus.retailinmotion.com/repository/helm-hosted
+
+############################################################
+# Install LocalStack
+############################################################
+helm repo update
+echo -e "${GREEN}Installing LocalStack${NC}"
+echo "Installing LocalStack chart..."
+helm install localstack -n default nexus/localstack
+
 ############################################################
 # Install Confluent REST Proxy
 ############################################################
+helm repo update
 echo -e "${GREEN}Installing Confluent REST Proxy${NC}"
 echo "Installing Confluent REST Proxy chart..."
 helm install schemaregistry -n infrastructure nexus/cp-schema-registry
@@ -255,6 +310,7 @@ helm install schemaregistry -n infrastructure nexus/cp-schema-registry
 ############################################################
 # Install kafkarest
 ############################################################
+helm repo update
 echo -e "${GREEN}Installing kafkarest${NC}"
 echo "Installing kafkarest chart..."
 helm install kafkarest -n infrastructure nexus/cp-kafka-rest --version 1.4.1
